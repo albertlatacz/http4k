@@ -15,6 +15,7 @@ import org.http4k.core.ContentType.Companion.APPLICATION_XML
 import org.http4k.core.ContentType.Companion.OCTET_STREAM
 import org.http4k.core.ContentType.Companion.TEXT_PLAIN
 import org.http4k.core.Credentials
+import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Method.GET
 import org.http4k.core.Method.POST
@@ -84,7 +85,7 @@ abstract class ContractRendererContract<NODE>(private val json: Json<NODE>, prot
                 tags += Tag("tag3")
                 tags += Tag("tag1")
             } bindContract GET to { Response(OK) }
-            routes += "/paths" / Path.of("firstName") / "bertrand" / Path.boolean().of("age") bindContract POST to { a, _, _ -> { Response(OK).body(a) } }
+            routes += "/paths" / Path.of("firstName") / "bertrand" / Path.boolean().of("age") bindContract POST to { a, _, _ -> HttpHandler { Response(OK).body(a) } }
             routes += "/queries" meta {
                 queries += Query.boolean().required("b", "booleanQuery")
                 queries += Query.string().optional("s", "stringQuery")
@@ -129,7 +130,7 @@ abstract class ContractRendererContract<NODE>(private val json: Json<NODE>, prot
                 security = BasicAuthSecurity("foo", credentials, "or1").or(BasicAuthSecurity("foo", credentials, "or2"))
             } bindContract POST to { Response(OK) }
             routes += "/oauth2_auth" meta {
-                security = AuthCodeOAuthSecurity(OAuthProvider.gitHub({ Response(OK) },
+                security = AuthCodeOAuthSecurity(OAuthProvider.gitHub(HttpHandler { Response(OK) },
                     credentials,
                     Uri.of("http://localhost/callback"),
                     FakeOAuthPersistence()))
